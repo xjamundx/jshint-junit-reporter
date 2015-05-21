@@ -59,8 +59,10 @@ function getMatchingResultFileName(file, failureList) {
 			return failureFile;
 		}
 
-		return file;
 	}
+
+
+	return file;
 
 }
 
