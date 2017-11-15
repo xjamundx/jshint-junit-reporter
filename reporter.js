@@ -17,16 +17,19 @@ function encode(s) {
 		"<": "&lt;",
 		">": "&gt;"
 	};
+
 	for (var r in pairs) {
 		if (typeof(s) !== "undefined") {
 			s = s.replace(new RegExp(r, "g"), pairs[r]);
 		}
 	}
+
 	return s || "";
 }
 
 function failure_message(failures) {
 	var count = failures.length;
+
 	if (count === 1) {
 		return "1 JSHINT Failure";
 	} else {
@@ -37,45 +40,41 @@ function failure_message(failures) {
 function failure_details(failures) {
 	var msg = [];
 	var item;
+
 	for (var i = 0; i < failures.length; i++) {
 		item = failures[i];
 		msg.push(i+1 + ". line " + item.line + ", char " + item.character + ": " + encode(item.reason));
 	}
+
 	return msg.join("\n");
 }
 
-//jsxhint stores the files in a tmp dir
-//this means the data list and the results array don't match
-//to remedy we can loop through list and remove the non-matching string
+// jsxhint stores the files in a tmp dir
+// this means the data list and the results array don't match
+// to remedy we can loop through list and remove the non-matching string
 function getMatchingResultFileName(file, failureList) {
-
 	for (var failureFile in failureList) {
-
-		//if the end of the file provided identically matches that in the failures list
-		//the files will be the same just 1 has a bunch of tmpdir rubbish at the front.
-		//return the failureFile link
-
 		if (file.indexOf(failureFile) === (file.length-failureFile.length)) {
+			// if the end of the file provided identically matches that in the failures list
+			// the files will be the same just 1 has a bunch of tmpdir rubbish at the front.
+			// return the failureFile link
 			return failureFile;
 		}
-
 	}
 
-
 	return file;
-
 }
 
 exports.reporter = function (results, data, opts) {
-
 	var out = [];
 	var files = {};
 
 	opts = opts || {};
 	opts.outputFile = opts.outputFile || null;
 
-	if (opts.outputFile && !outputFile)
+	if (opts.outputFile && !outputFile) {
 		outputFile = opts.outputFile;
+	}
 
 	results.forEach(function (result) {
 		result.file = result.file.replace(/^\.\//, '');
@@ -83,6 +82,7 @@ exports.reporter = function (results, data, opts) {
 		if (!files[result.file]) {
 			files[result.file] = [];
 		}
+
 		files[result.file].push(result.error);
 	});
 
@@ -97,18 +97,15 @@ exports.reporter = function (results, data, opts) {
 	for (var i = 0; i < data.length; i++) {
 		var fileName = data[i].file;
 
-		//so this works with jsxhint as well
-		//jsxhint puts the files into a cache dir
-		//but doesn't change the location of the results to match
-		//so we have to work around it
+		// jsxhint puts the files into a cache dir but doesn't change the location of the results to match
 		if (fileName.indexOf('/jsxhint/') > -1) {
 			fileName = getMatchingResultFileName(fileName, files);
 		}
 
-		//jshint seems to shove itself at the start in some versions
+		// jshint seems to shove itself at the start in some versions
 		if (fileName !== 'jshint') {
-			//has an error
 			if (files[fileName]) {
+				// has an error
 				out.push("\t<testcase name=\"" + fileName + "\">");
 				out.push("\t\t<failure message=\"" + failure_message(files[fileName]) + "\">");
 				out.push(failure_details(files[fileName]));
@@ -130,5 +127,4 @@ exports.reporter = function (results, data, opts) {
 	}
 
 	return out;
-
 };
