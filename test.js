@@ -147,6 +147,67 @@ tests.push(function() {
   }
 });
 
+// TEST
+// verify output for multiple files
+tests.push(function() {
+  // Arrange
+  var formatter = require('./reporter.js');
+  process.stdout.write = function() {};
+  var mock = {
+    results: [
+      { 
+        file: 'reporter.js',
+        error: {
+          id: '(error)',
+          raw: 'Missing "use strict" statement.',
+          evidence: '  var pairs = {',
+          line: 9,
+          character: 3,
+          scope: '(main)',
+          a: undefined,
+          b: undefined,
+          c: undefined,
+          d: undefined,
+          reason: 'Missing "use strict" statement.' 
+        }
+      },
+      { 
+        file: './my/file.js',
+        error: { 
+          id: '(error)',
+          raw: 'Missing "use strict" statement.',
+          evidence: '  var count = failures.length;',
+          line: 25,
+          character: 3,
+          scope: '(main)',
+          a: undefined,
+          b: undefined,
+          c: undefined,
+          d: undefined,
+          reason: 'Missing "use strict" statement.' 
+        }
+      }
+    ],
+    data: [{
+        file: 'reporter.js'
+      },
+      {
+        file: 'my/file.js'
+      }
+    ],
+    opts: null
+  };
+  var expected = '<?xml version="1.0" encoding="utf-8"?><testsuite name="jshint" tests="2" failures="2" errors="0"><testcase name="reporter.js"><failure message="1 JSHINT Failure">1. line 9, char 3: Missing &quot;use strict&quot; statement.</failure></testcase><testcase name="my/file.js"><failure message="1 JSHINT Failure">1. line 25, char 3: Missing &quot;use strict&quot; statement.</failure></testcase></testsuite>';
+
+  // Act
+  var results = formatter.reporter(mock.results, mock.data, mock.opts);
+  process.stdout.write = oldWrite;
+
+  // Assert
+  if (results.replace(strip, '') !== expected.replace(strip, '')) {
+    throw new Error('Unexpected results: ' + results);
+  }
+});
 
 // lint this file, but only if you have jshint
 tests.push(function() {
