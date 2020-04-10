@@ -78,6 +78,7 @@ exports.reporter = function (results, data, opts) {
 
 	results.forEach(function (result) {
 		result.file = result.file.replace(/^[\.\/\\]*/, '');
+		result.file = result.file.replace(/\\/g, '/');
 
 		if (!files[result.file]) {
 			files[result.file] = [];
