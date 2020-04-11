@@ -147,6 +147,46 @@ tests.push(function() {
   }
 });
 
+// TEST
+// Verify for windows path file
+tests.push(function() {
+  // Arrange
+  var formatter = require('./reporter.js');
+  process.stdout.write = function() {};
+  var mock = {
+    results: [{
+      file: '.\\my\\file.js',
+      error: {
+          id: '(error)',
+          raw: 'Missing semicolon.',
+          code: 'W033',
+          evidence: '}',
+          line: 36,
+          character: 2,
+          scope: '(main)',
+          a: undefined,
+          b: undefined,
+          c: undefined,
+          d: undefined,
+          reason: 'Missing semicolon.'
+      }
+    }],
+    data: [{
+      file: 'my/file.js'
+    }],
+    opts: null
+  };
+  var expected = '<?xml version="1.0" encoding="utf-8"?><testsuite name="jshint" tests="1" failures="1" errors="0"><testcase name="my/file.js"><failure message="1 JSHINT Failure">1. line 36, char 2: Missing semicolon.</failure></testcase></testsuite>';
+
+  // Act
+  var results = formatter.reporter(mock.results, mock.data, mock.opts);
+  process.stdout.write = oldWrite;
+
+  // Assert
+  if (results.replace(strip, '') !== expected.replace(strip, '')) {
+    throw new Error('Unexpected results');
+  }
+});
 
 // lint this file, but only if you have jshint
 tests.push(function() {
